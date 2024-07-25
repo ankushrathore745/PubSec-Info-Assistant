@@ -368,7 +368,7 @@ module searchServices 'core/search/search-services.bicep' = {
   params: {
     name: !empty(searchServicesName) ? searchServicesName : '${prefix}-${abbrs.searchSearchServices}${randomString}'
     keyVaultName: kvModule.outputs.keyVaultName
-    location: location
+    location: 'eastus'
     tags: tags
     authOptions: {
       aadOrApiKey: {
