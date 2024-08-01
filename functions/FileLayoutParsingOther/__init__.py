@@ -31,6 +31,10 @@ pdf_submit_queue = os.environ["PDF_SUBMIT_QUEUE"]
 text_enrichment_queue = os.environ["TEXT_ENRICHMENT_QUEUE"]
 CHUNK_TARGET_SIZE = int(os.environ["CHUNK_TARGET_SIZE"])
 
+NEW_AFTER_N_CHARS = 1500
+COMBINE_UNDER_N_CHARS = 500
+MAX_CHARACTERS = 1500
+
 
 utilities = Utilities(azure_blob_storage_account, azure_blob_storage_endpoint, azure_blob_drop_storage_container, azure_blob_content_storage_container, azure_blob_storage_key)
 function_name = "FileLayoutParsingOther"
@@ -49,22 +53,21 @@ def PartitionFile(file_extension: str, file_url: str):
     response.close()   
     metadata = [] 
     elements = None
-    file_extension_lower = file_extension.lower()
     try:        
-        if file_extension_lower == '.csv':
+        if file_extension == '.csv':
             from unstructured.partition.csv import partition_csv
             elements = partition_csv(file=bytes_io)               
                      
-        elif file_extension_lower == '.doc':
+        elif file_extension == '.doc':
             from unstructured.partition.doc import partition_doc
             elements = partition_doc(file=bytes_io) 
             
-        elif file_extension_lower == '.docx':
+        elif file_extension == '.docx':
             from unstructured.partition.docx import partition_docx
             elements = partition_docx(file=bytes_io)
             
-        elif file_extension_lower == '.eml' or file_extension_lower == '.msg':
-            if file_extension_lower == '.msg':
+        elif file_extension == '.eml' or file_extension == '.msg':
+            if file_extension == '.msg':
                 from unstructured.partition.msg import partition_msg
                 elements = partition_msg(file=bytes_io) 
             else:        
@@ -77,31 +80,31 @@ def PartitionFile(file_extension: str, file_url: str):
                 sent_to_str = sent_to_str + " " + sent_to
             metadata.append(sent_to_str)
             
-        elif file_extension_lower == '.html' or file_extension_lower == '.htm':  
+        elif file_extension == '.html' or file_extension == '.htm':  
             from unstructured.partition.html import partition_html
             elements = partition_html(file=bytes_io) 
             
-        elif file_extension_lower == '.md':
+        elif file_extension == '.md':
             from unstructured.partition.md import partition_md
             elements = partition_md(file=bytes_io)
                        
-        elif file_extension_lower == '.ppt':
+        elif file_extension == '.ppt':
             from unstructured.partition.ppt import partition_ppt
             elements = partition_ppt(file=bytes_io)
             
-        elif file_extension_lower == '.pptx':    
+        elif file_extension == '.pptx':    
             from unstructured.partition.pptx import partition_pptx
             elements = partition_pptx(file=bytes_io)
             
-        elif any(file_extension_lower in x for x in ['.txt', '.json']):
+        elif any(file_extension in x for x in ['.txt', '.json']):
             from unstructured.partition.text import partition_text
             elements = partition_text(file=bytes_io)
             
-        elif file_extension_lower == '.xlsx':
+        elif file_extension == '.xlsx':
             from unstructured.partition.xlsx import partition_xlsx
             elements = partition_xlsx(file=bytes_io)
             
-        elif file_extension_lower == '.xml':
+        elif file_extension == '.xml':
             from unstructured.partition.xml import partition_xml
             elements = partition_xml(file=bytes_io)
             
@@ -157,10 +160,9 @@ def main(msg: func.QueueMessage) -> None:
         
         # Chunk the file     
         from unstructured.chunking.title import chunk_by_title
-        NEW_AFTER_N_CHARS = 2000
-        COMBINE_UNDER_N_CHARS = 1000
-        MAX_CHARACTERS = 2750
-        chunks = chunk_by_title(elements, multipage_sections=True, new_after_n_chars=NEW_AFTER_N_CHARS, combine_text_under_n_chars=COMBINE_UNDER_N_CHARS, max_characters=MAX_CHARACTERS)   
+        # chunks = chunk_by_title(elements, multipage_sections=True, new_after_n_chars=NEW_AFTER_N_CHARS, combine_under_n_chars=COMBINE_UNDER_N_CHARS)
+        # chunks = chunk_by_title(elements, multipage_sections=True, new_after_n_chars=NEW_AFTER_N_CHARS, combine_under_n_chars=COMBINE_UNDER_N_CHARS, max_characters=MAX_CHARACTERS)   
+        chunks = chunk_by_title(elements, multipage_sections=True, new_after_n_chars=NEW_AFTER_N_CHARS, combine_text_under_n_chars=COMBINE_UNDER_N_CHARS)
         statusLog.upsert_document(blob_name, f'{function_name} - chunking complete. {len(chunks)} chunks created', StatusClassification.DEBUG)
                 
         subtitle_name = ''
@@ -199,4 +201,3 @@ def main(msg: func.QueueMessage) -> None:
         statusLog.upsert_document(blob_name, f"{function_name} - An error occurred - {str(e)}", StatusClassification.ERROR, State.ERROR)
 
     statusLog.save_document(blob_name)
-    
