@@ -186,7 +186,7 @@ def access_token():
  
     client_id = os.environ.get("CLIENT_ID")
     client_secret =  os.environ.get("MICROSOFT_PROVIDER_AUTHENTICATION_SECRET")
-    tenent_id =  os.environ.get("TENENT_ID")
+    tenent_id =  os.environ.get("AZURE_TENANT_ID")
     auth = f"https://login.microsoftonline.com/{tenent_id}"
    
     app1 = ConfidentialClientApplication(
