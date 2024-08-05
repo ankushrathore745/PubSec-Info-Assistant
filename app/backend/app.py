@@ -20,6 +20,7 @@ from azure.storage.blob import (
     ResourceTypes,
     generate_account_sas,
 )
+from msal import ConfidentialClientApplication
 from flask import Flask, jsonify, request
 from shared_code.status_log import State, StatusClassification, StatusLog
 from shared_code.tags_helper import TagsHelper
@@ -176,6 +177,28 @@ app = Flask(__name__)
 def static_file(path):
     """Serve static files from the 'static' directory"""
     return app.send_static_file(path)
+
+
+
+@app.route("/Create_Access_Token", methods=["POST"])
+def access_token():
+ 
+ 
+    client_id = os.environ.get("CLIENT_ID")
+    client_secret =  os.environ.get("CLIENT_SECRET")
+    tenent_id =  os.environ.get("TENENT_ID")
+    auth = f"https://login.microsoftonline.com/{tenent_id}"
+   
+    app1 = ConfidentialClientApplication(
+        client_id=client_id,
+        client_credential=client_secret,
+        authority=auth
+    )
+    scope =  os.environ.get("SCOPE")
+    result = app1.acquire_token_for_client(scope)
+    access_token1 = result.get("access_token")
+   
+    return access_token1
 
 @app.route("/chat", methods=["POST"])
 def chat():
