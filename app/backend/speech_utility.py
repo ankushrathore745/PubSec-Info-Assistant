@@ -9,6 +9,7 @@ from azure.core.exceptions import ResourceExistsError
 
 
 def ensure_container_exists(container_name):
+    connection_string = os.environ["BLOB_CONNECTION_STRING"]
     connection_string = os.environ("BLOB_CONNECTION_STRING")
     # Initialize the BlobServiceClient
     blob_service_client = BlobServiceClient.from_connection_string(connection_string)
