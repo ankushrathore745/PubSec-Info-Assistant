@@ -9,7 +9,7 @@ from azure.core.exceptions import ResourceExistsError
 
 
 def ensure_container_exists(container_name):
-    connection_string = os.environ["BLOB_CONNECTION_STRING"]
+    connection_string = os.environ("BLOB_CONNECTION_STRING")
     # Initialize the BlobServiceClient
     blob_service_client = BlobServiceClient.from_connection_string(connection_string)
     # Get the container client
@@ -79,7 +79,7 @@ def blob_to_speech_to_text_text(blob):
     container_name = os.environ.get('BLOB_CONTAINER_NAME')
     #blob_name = "input_output.wav"
     
-    connection_string = os.environ["BLOB_CONNECTION_STRING"]
+    connection_string = os.environ("BLOB_CONNECTION_STRING")
     speech_key = os.environ.get('SPEECH_KEY') 
     service_region = os.environ.get('SERVICE_REGION')
     target_language="en"
@@ -133,7 +133,7 @@ def text_to_text_to_speech_to_blob(output_blob_name,output_english_text,target_l
     translated_target_text=text_to_text(output_english_text,"en",target_language)
 
 
-    connection_string = os.environ["BLOB_CONNECTION_STRING"]
+    connection_string = os.environ("BLOB_CONNECTION_STRING")
     
 
 
