@@ -180,26 +180,6 @@ def static_file(path):
 
 
 
-@app.route("/Create_Access_Token", methods=["POST"])
-def access_token():
- 
- 
-    client_id = os.environ.get("CLIENT_ID")
-    client_secret =  os.environ.get("MICROSOFT_PROVIDER_AUTHENTICATION_SECRET")
-    tenent_id =  os.environ.get("AZURE_TENANT_ID")
-    auth = f"https://login.microsoftonline.com/{tenent_id}"
-   
-    app1 = ConfidentialClientApplication(
-        client_id=client_id,
-        client_credential=client_secret,
-        authority=auth
-    )
-    scope =  os.environ.get("SCOPE")
-    result = app1.acquire_token_for_client(scope)
-    access_token1 = result.get("access_token")
-   
-    return access_token1
-
 @app.route("/chat", methods=["POST"])
 def chat():
     """Chat with the bot using a given approach"""
