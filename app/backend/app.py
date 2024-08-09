@@ -212,7 +212,7 @@ def chat():
                 {
                     "output_audio_path": output_audio_path,
                     "data_points": r["data_points"],
-                    "answer": r["answer"],
+                    "answer": r["answer"].split("[")[0].strip(),
                     "thoughts": r["thoughts"],
                     "citation_lookup": r["citation_lookup"],
                 })
@@ -223,7 +223,7 @@ def chat():
                 {
                     "output_audio_path": "",
                     "data_points": r["data_points"],
-                    "answer": r["answer"],
+                    "answer": r["answer"].split("[")[0].strip(),
                     "thoughts": r["thoughts"],
                     "citation_lookup": r["citation_lookup"],
                 })
