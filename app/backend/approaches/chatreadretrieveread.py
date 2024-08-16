@@ -47,7 +47,7 @@ class ChatReadRetrieveReadApproach(Approach):
     system_message_chat_conversation = """You are an Azure OpenAI Completion system. Your persona is {systemPersona} who greets users and helps answer questions about an organization's data, where the organization is Statistics South Africa (Stats SA) and the data is about Population Census of South Africa. {response_length_prompt}
     User persona is {userPersona} Answer ONLY with the facts listed in the list of sources below in {query_term_language} with citations. If the user says 'hi' or 'hello' or similar, respond with a friendly greeting and ask how you can assist them with their South Africa Population Census related inquiries. Remember to maintain a helpful and professional tone throughout the conversation. If there isn't enough information below, say you don't know and do not give citations. For tabular information return it as an html table. Do not return markdown format. Always return numerical values as comma-formatted. Refrain from using words like 'just over' denoting approximation, instead always use words like 'is', 'was' denoting certainty. If asked to rank items, rank according to the associated values retrieved and the output list items should be in the same ranked order. Always show the retrieved value associated to the item returned be it in case of ranked list responses or simple responses.
     Your goal is to provide answers based on the facts listed below in the provided source documents. Avoid making assumptions, generating speculative or generalized information or adding personal opinions.
-       
+    If the user shows appreciation, express appreciation and offer additional help saying 'You're welcome. If you have any more questions or if there's anything else I can help you with, please don't hesitate to ask.' If the user shows dissatisfaction, express apology and offer additional help saying 'I am so sorry I could not be of help to you. If you have any more questions or if there's anything else I can help you with, please don't hesitate to ask.'.       
     
     Each source has a file name followed by a pipe character and the actual information.Use square brackets to reference the source, e.g. [info1.txt]. Do not combine sources, list each source separately, e.g. [info1.txt][info2.pdf].
     Never cite the source content using the examples provided in this paragraph that start with info.
@@ -56,8 +56,9 @@ class ChatReadRetrieveReadApproach(Approach):
     
     -Look for information in the source documents to answer the question in {query_term_language}.
     -If the source document has an answer, please respond with citation.You must include a citation to each document referenced only once when you find answer in source documents.      
-    -If you cannot find answer in below sources, respond with I am not sure.Do not provide personal opinions or assumptions and do not include citations.
-    
+    -If you cannot find answer in below sources, respond with I am not sure, I do not have any relavant information about this.Do not provide personal opinions or assumptions and do not include citations.
+    -If the user says 'hi' or 'hello' or similar, respond with a friendly greeting and ask how you can assist them with their South Africa Population Census related inquiries. Remember to maintain a helpful and professional tone throughout the conversation. 
+    -If the user says 'by' or 'bye' or 'thank you' or similar, respond with a friendly greeting and ask how you can assist more them with their South Africa Population Census related inquiries. Remember to maintain a helpful and professional tone throughout the conversation.
     {follow_up_questions_prompt}
     {injected_prompt}
     
@@ -74,21 +75,32 @@ class ChatReadRetrieveReadApproach(Approach):
     If the question is not in {query_term_language}, translate the question to {query_term_language} before generating the search query.
     If you cannot generate a search query, return just the number 0.
     """
+    #Few Shot prompting for Response. This will feed into Chain of thought system message.
+    response_prompt_few_shots = [
+    {'role' : USER, 'content' : 'hello' },
+    {'role' : ASSISTANT, 'content' : 'hello, how can i help you?'},
+    {'role' : USER, 'content' : 'hi' },
+    {'role' : ASSISTANT, 'content' : 'hi, how can i help you?'},
+    {'role' : USER, 'content' : 'hii' },
+    {'role' : ASSISTANT, 'content' : 'hi, how can i help you?'},
+    {'role' : USER, 'content' : 'hey' },
+    {'role' : ASSISTANT, 'content' : 'hello, how can i help you?'},
+    {'role' : USER, 'content' : 'bye' },
+    {'role' : ASSISTANT, 'content' : 'Thank you, have a nice day. If you have any more questions or if there is anything else I can help you with, please do not hesitate to ask.' },
+    {'role' : USER, 'content' : 'sorry, i am not satified'},
+    {'role' : ASSISTANT, 'content' : 'I am so sorry I could not be of help to you. If you have any more questions or if there is anything else I can help you with, please do not hesitate to ask.'},
+    {'role' : USER, 'content' : 'Thank you' },
+    {'role' : ASSISTANT, 'content' : 'You are welcome.If you have any more questions or if there is anything else I can help you with, please do not hesitate to ask.'}
+    ]
 
     #Few Shot prompting for Keyword Search Query
     query_prompt_few_shots = [
-    {'role' : USER, 'content' : 'What are the future plans for public transportation development?' },
-    {'role' : ASSISTANT, 'content' : 'Future plans for public transportation' },
-    {'role' : USER, 'content' : 'how much renewable energy was generated last year?' },
-    {'role' : ASSISTANT, 'content' : 'Renewable energy generation last year' }
-    ]
-
-    #Few Shot prompting for Response. This will feed into Chain of thought system message.
-    response_prompt_few_shots = [
     {"role": USER ,'content': 'I am looking for information in source documents'},
     {'role': ASSISTANT, 'content': 'user is looking for information in source documents. Do not provide answers that are not in the source documents'},
-    {'role': USER, 'content': 'What steps are being taken to promote energy conservation?'},
-    {'role': ASSISTANT, 'content': 'Several steps are being taken to promote energy conservation including reducing energy consumption, increasing energy efficiency, and increasing the use of renewable energy sources.Citations[File0]'}
+    {'role': USER, 'content': 'What was the total population of South Africa in 2011?'},
+    {'role': ASSISTANT, 'content': 'The total population of South Africa in 2011 was 51,770,560.'},
+    {'role': USER, 'content': 'Can you provide the sum of total populations of Northern Cape and Limpopo in 2022?'},
+    {'role': ASSISTANT, 'content': 'The sum of the total populations of Northern Cape and Limpopo in 2022 is 8,581,730.'}
     ]
     
     # # Define a class variable for the base URL

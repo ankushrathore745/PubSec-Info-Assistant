@@ -202,7 +202,7 @@ def chat():
             request.json["history"].append({"user":translated_english_text})
             
             r = impl.run(request.json["history"], request.json.get("overrides") or {})
-            output_english_text = r['answer'].split("[")[0].strip()
+            output_english_text = r['answer']
             output_audio_path = "output_"+ input_audio_path
             output_audio_path = text_to_text_to_speech_to_blob(output_audio_path, output_english_text, detected_language)
       
@@ -212,7 +212,7 @@ def chat():
                 {
                     "output_audio_path": output_audio_path,
                     "data_points": r["data_points"],
-                    "answer": r["answer"].split("[")[0].strip(),
+                    "answer": r["answer"],
                     "thoughts": r["thoughts"],
                     "citation_lookup": r["citation_lookup"],
                 })
@@ -223,7 +223,7 @@ def chat():
                 {
                     "output_audio_path": "",
                     "data_points": r["data_points"],
-                    "answer": r["answer"].split("[")[0].strip(),
+                    "answer": r["answer"],
                     "thoughts": r["thoughts"],
                     "citation_lookup": r["citation_lookup"],
                 })
